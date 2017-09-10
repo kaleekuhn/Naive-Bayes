@@ -7,8 +7,19 @@ public class Main {
         System.out.println("Hello World!");
         System.out.println("Params?: " + args[0]);
 
+        ArrayList<ArrayList<String>> listOfLists = fileToArrayList(args[0]);
 
-        File testData = new File("../project1/data/" + args[0]);
+        //Print Array
+        for(int x=0; x<listOfLists.size(); x++) {
+            for(int y=0; y<listOfLists.get(x).size(); y++) {
+                System.out.print(listOfLists.get(x).get(y));
+            }
+            System.out.println();
+        }
+    }
+
+    private static ArrayList<ArrayList<String>> fileToArrayList(String fileName) {
+        File testData = new File("../project1/data/" + fileName);
         System.out.println(testData.getAbsolutePath());
 
         try {
@@ -29,31 +40,27 @@ public class Main {
 
             String fullLine;
             int counter=0;
-            for(int x=0; x<listOfLists.size(); x++){
-                while(sc.hasNext()) {
-                    fullLine = sc.nextLine();
-                    Scanner sc2 = new Scanner(fullLine).useDelimiter("\\s");
-                    counter=0;
-                    while(sc2.hasNext()) {
-                        listOfLists.get(counter).add(sc2.next());
-                        counter++;
-                    }
 
-
-                    sc2.close();
-                }
+            Scanner scHeader = new Scanner(headerLine).useDelimiter("\\s");
+            while(scHeader.hasNext()) {
+                listOfLists.get(counter).add(scHeader.next());
+                counter++;
             }
 
-            //To print out array
-            for(int x=0; x<listOfLists.size(); x++) {
-                for(int y=0; y<listOfLists.get(x).size(); y++) {
-                    System.out.print(listOfLists.get(x).get(y));
+            while(sc.hasNext()) {
+                fullLine = sc.nextLine();
+                Scanner sc2 = new Scanner(fullLine).useDelimiter("\\s");
+                counter = 0;
+                while (sc2.hasNext()) {
+                    listOfLists.get(counter).add(sc2.next());
+                    counter++;
                 }
-                System.out.println();
+                sc2.close();
             }
-
+            return listOfLists;
         }catch (Exception ex){
             ex.printStackTrace();
+            return null;
         }
     }
 }
