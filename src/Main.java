@@ -26,26 +26,81 @@ public class Main {
         ArrayList<String> tree=new ArrayList<String>((int)Math.pow(decisionData.size(),2));
         decisionData.remove(decisionData.size()-1);
         System.out.println();
-       tree=createTree(decisionData,classList,CalcEntropy((double)numOfOnes,(double)numOfZeros),decideSplit(decisionData,classList,CalcEntropy((double)numOfOnes,(double)numOfZeros)),tree);
-       tree.add(0,"holder");
-       for(int x=0; x<tree.size();x++)
-         System.out.println("[" + x + "] " + tree.get(x));
+        tree=createTree(decisionData,classList,CalcEntropy((double)numOfOnes,(double)numOfZeros),decideSplit(decisionData,classList,CalcEntropy((double)numOfOnes,(double)numOfZeros)),tree);
+        tree.add(0,"holder");
 
-        System.out.println(printTree(tree, 1, 0));
+                //Apple
+            //Orange        //Pear
+        //Pear  //Pear     0     //Orange
+    //0     1   1     0             1    0
+        ArrayList<String> fake = new ArrayList<String>();
+        fake.add("Holder");
+        fake.add("Apple");//1
+        fake.add("Orange");//2
+        fake.add("Pear");//3
+        fake.add("Pear");//4
+        fake.add("Pear");//5
+        fake.add("0");//6
+        fake.add("Orange");//7
+        fake.add("0");//8
+        fake.add("1");//9
+        fake.add("1");//10
+        fake.add("0");//11
+        fake.add("null");//12
+        fake.add("null");//13
+        fake.add("1");//14
+        fake.add("0");//15
+
+
+
+
+       for(int x=0; x<fake.size();x++)
+         System.out.println("[" + x + "] " + fake.get(x));
+
+        System.out.println(printTree(fake, 1, 0));
     }
     //Start at the second element in the array, if true, jump 2x, if false, jump 2x+1
     //print the current first element, then send to PrintTree the previous logic to the length of the current array / 2
     private static String printTree(ArrayList<String> treeArray, int location, int depth) {
+        int occur = 0;
+        if(location < treeArray.size() - 1 && treeArray.get(location)!="null") {
 
-        depth++;
-        for(int x=0; x<depth; x++){
-            System.out.print("| ");
-        }
+            int endValue, endValueT = -2, endValueF = -2;
+            try {
+                endValue = Integer.parseInt(treeArray.get(location));
+                if(location*2<treeArray.size()) {
+                    endValueT = Integer.parseInt(treeArray.get(location * 2));
+                    endValueF = Integer.parseInt(treeArray.get(location * 2 + 1));
+                }
 
-        if(location < treeArray.size()) {
-            System.out.println(treeArray.get(location) + " : " + location);
-            printTree(treeArray, location*2, depth); //First Half
-            printTree(treeArray, (location*2)+1, depth); //Second Half
+            } catch(NumberFormatException e) {
+                endValue = -1;
+                endValueF = -1;
+                endValueT = -1;
+            }
+
+            for(int x=0; x<depth; x++){
+                System.out.print("| ");
+            }
+
+            if(location*2>treeArray.size()-1) {
+                System.out.println(treeArray.get(location) + " = " + occur + " : " + ((endValue>=0) ? endValueT : ""));
+            }
+            else {
+                System.out.println(treeArray.get(location) + " = " + occur + " : " + ((endValue >= 0) ? endValue : ""));
+                printTree(treeArray, location * 2, depth + 1); //True
+            }
+
+            for(int x=0; x<depth; x++){
+                System.out.print("| ");
+            }
+
+            if(location*2>treeArray.size()) {
+                System.out.println(treeArray.get(location) + " = " + occur + " : " + ((endValue>=0) ? endValueF : ""));
+            } else {
+                System.out.println(treeArray.get(location) + " = " + (occur + 1) + " : " + ((endValue >= 0) ? endValue : ""));
+            }
+            printTree(treeArray, (location*2)+1, depth + 1); //False
         }
         return "Moose";
     }
