@@ -4,33 +4,31 @@ import java.util.*;
 public class Main {
 
     public static void main(String[] args) {
-       // System.out.println("Hello World!");
-        int numOfZeros=0, numOfOnes=0;
+        // System.out.println("Hello World!");
+        int numOfZeros = 0, numOfOnes = 0;
         System.out.println("Params?: " + args[0]);
         ArrayList<ArrayList<String>> decisionData = fileToArrayList(args[0]);
 
         //Print Array
-        for(int x=1; x<decisionData.get(decisionData.size()-1).size(); x++) {
-            if(decisionData.get(decisionData.size()-1).get(x).equals("1"))
-            {
+        for (int x = 1; x < decisionData.get(decisionData.size() - 1).size(); x++) {
+            if (decisionData.get(decisionData.size() - 1).get(x).equals("1")) {
                 numOfOnes++;
-            }
-            else
+            } else
                 numOfZeros++;
         }
-        ArrayList<String> classList=decisionData.get(decisionData.size()-1);
-        ArrayList<String> tree=new ArrayList<String>((int)Math.pow(decisionData.size(),2));
-        decisionData.remove(decisionData.size()-1);
+        ArrayList<String> classList = decisionData.get(decisionData.size() - 1);
+        ArrayList<String> tree = new ArrayList<String>((int) Math.pow(decisionData.size(), 2));
+        decisionData.remove(decisionData.size() - 1);
         System.out.println();
-       tree=createTree(decisionData,classList,CalcEntropy((double)numOfOnes,(double)numOfZeros),decideSplit(decisionData,classList,CalcEntropy((double)numOfOnes,(double)numOfZeros)),tree);
-       for(int x=0; x<tree.size();x++)
-         System.out.println(tree.get(x)+"  "+x);
+        tree = createTree(decisionData, classList, CalcEntropy((double) numOfOnes, (double) numOfZeros), decideSplit(decisionData, classList, CalcEntropy((double) numOfOnes, (double) numOfZeros)), tree);
+        for (int x = 0; x < tree.size(); x++) {
+            System.out.println(tree.get(x) + "  " + x);
+        }
     }
-
     private static int decideSplit ( ArrayList<ArrayList<String>> check, ArrayList<String> test, double entropy) {
 
-        int[] whenTestOne=new int[(int)Math.pow(check.size(),2)];
-        int[] whenTestZero=new int[(int)Math.pow(check.size(),2)];
+        int[] whenTestOne=new int[Math.max((int)Math.pow(check.size(),2),2)];
+        int[] whenTestZero=new int[Math.max((int)Math.pow(check.size(),2),2)];
         int split=0;
         double min=-111;
         double [] InfoGain=new double[check.size()];
@@ -68,8 +66,8 @@ public class Main {
             entropyfractionR=(double)(whenTestZero[(((x+1)*2)-1)]+whenTestZero[(((x+1)*2)-2)])/(whenTestOne[(((x+1)*2)-1)]+whenTestOne[(((x+1)*2)-2)]
                     +whenTestZero[(((x+1)*2)-1)]+whenTestZero[(((x+1)*2)-2)]);
 
-           InfoGain[x]= -1*(entropy-((CalcEntropy(whenTestOne[(((x+1)*2)-1)],whenTestOne[(((x+1)*2)-2)]))*entropyfractionL
-                   +(CalcEntropy(whenTestZero[(((x+1)*2)-1)],whenTestZero[(((x+1)*2)-2)]))*entropyfractionR));
+           InfoGain[x]= (entropy-(((CalcEntropy(whenTestOne[(((x+1)*2)-1)],whenTestOne[(((x+1)*2)-2)]))*entropyfractionL)
+                   +((CalcEntropy(whenTestZero[(((x+1)*2)-1)],whenTestZero[(((x+1)*2)-2)]))*entropyfractionR)));
         }
        for(int z=0;z< InfoGain.length ;z++)
         {
@@ -145,9 +143,19 @@ public class Main {
     }
     private static ArrayList<String> createTree(ArrayList<ArrayList<String>> check, ArrayList<String> test, double entropy, int split,ArrayList<String> tree){
         int numOfOnes=0,numOfZeros=0;
-
-        if(check.size()<=2||test.size()<=1)
+        if(check.size()==1)
+        {
+            for(int x=1;x<test.size();x++)
+                if(test.get(x).equals("1"))
+                    numOfOnes++;
+                else numOfZeros++;
+                if(numOfOnes>numOfZeros)
+            tree.add("T");
+                else
+            tree.add("F");
             return tree;
+        }
+
         ArrayList<ArrayList<String>> checkL= new ArrayList<ArrayList<String>>();
         ArrayList<ArrayList<String>> checkR= new ArrayList<ArrayList<String>>();
         ArrayList<ArrayList<String>> testL= new ArrayList<ArrayList<String>>();
@@ -168,7 +176,7 @@ public class Main {
         }
 
 
-
+        //split into true and false components of the split
         for(int x=0; x<check.size();x++)
         {
             for(int y=1; y<check.get(split).size();y++)
@@ -187,22 +195,37 @@ public class Main {
                 }
             }
         }
+        //if there is nothing in the tree initially add an empty node and then add the current node to the tree
         if(tree.size()==0)
-            tree.add(check.get(split).get(0));
+            tree.add(" ");
+            String name=check.get(split).get(0);//add current node to the tree
+
         if(testL.get(0).size()<2)
         {
             tree.add("T");
             tree.add("F");
             return tree;
         }
-        for(int x=1;x<testL.get(split).size();x++)
+
+        for(int x=1;x<testL.get(split).size();x++)//gets current node's class' data if it is pure put true or false and return
             if(testL.get(split).get(x).equals("1"))
                 numOfOnes++;
         else numOfZeros++;
+        if (numOfOnes==0)
+        {
+            tree.add("F");
+            return tree;
+        }
+        else if(numOfZeros==0)
+        {
+            tree.add("T");
+            return tree;
+        }
 
-        checkL.remove(split);
         entropyL=CalcEntropy((double)numOfOnes,(double)numOfZeros);
-       splitL= decideSplit(checkL,testL.get(split),entropyL);
+        splitL= decideSplit(checkL,testL.get(split),entropyL);
+        checkL.remove(split);
+        testL.remove(split);
         if(testR.get(0).size()<2)
         {
 
@@ -216,12 +239,22 @@ public class Main {
             if(testR.get(split).get(x).equals("1"))
                 numOfOnes++;
             else numOfZeros++;
+        if (numOfOnes==0)
+        {
+            tree.add("F");
+            return tree;
+        }
+        else if(numOfZeros==0)
+        {
+            tree.add("T");
+            return tree;
+        }
 
-        checkR.remove(split);
         entropyR=CalcEntropy((double)numOfOnes,(double)numOfZeros);
         splitR=decideSplit(checkR,testR.get(split),entropyR);
-
-        if(isPure(testL.get(splitL))){
+        checkR.remove(split);
+        testR.remove(split);
+        /*if(isPure(testL.get(splitL))){
             if(testL.get(splitL).get(1).equals("1"))
             tree.add("T");
             else
@@ -245,36 +278,45 @@ public class Main {
                 tree.add("T");
             else
                 tree.add("F");
-            
+            if(testL.get(0).size()<=2)
+                return tree;
+            tree= createTree(checkL,testL.get(splitL),entropyL,splitL,tree);
+            return tree;
+
         }
         else
             {
                 tree.add(checkL.get(splitL).get(0));
                 tree.add(checkR.get(splitR).get(0));
 
-            }
+            }*/
+        if(splitL!=0)
+            splitL--;
+        if(splitR!=0)
+            splitR--;
+        tree.add(name);
 
-       System.out.println();
-        if(!(entropyL==0.0))
+        System.out.println("entering left "+checkL.get(splitL).get(0));
+        tree=createTree(checkL,testL.get(splitL),entropyL,splitL,tree);
+        System.out.println("exiting left entering right "+ checkR.get(splitR).get(0));
+        tree= createTree(checkR,testR.get(splitR),entropyR,splitR,tree);
+       // return tree;
+        if(tree.get(tree.size()-1).equals("F")&&tree.get(tree.size()-2).equals("F") )
         {
-            System.out.println("Linfo   split"+splitL+"  entropy "
-                    + entropyL+"  checkL "+checkL.size()+"  testLlength "+testL.get(0).size()+"  testLsize "+testL.size());
-           if(testL.get(0).size()<=2)
-               return tree;
-            tree= createTree(checkL,testL.get(splitL),entropyL,splitL,tree);
+            tree.remove(tree.size()-1);
+            tree.remove(tree.size()-1);
+            tree.remove(tree.size()-1);
+            tree.add("F");
         }
-
-        if(!(entropyR==0.0))
+        else
+        if(tree.get(tree.size()-1).equals("T")&&tree.get(tree.size()-2).equals("T") )
         {
-            System.out.println("Rinfo   split"+splitR+"  entropy "
-                    + entropyR+"  checkR "+checkR.size()+"  testRlength "+testR.get(0).size()+"  testRsize "+testR.size());
-            if(testR.get(0).size()<=2)
-                return tree;
-            tree = createTree(checkR,testR.get(splitR),entropyR,splitR,tree);
+            tree.remove(tree.size()-1);
+            tree.remove(tree.size()-1);
+            tree.remove(tree.size()-1);
+            tree.add("T");
         }
-
         //split=decideSplit(check,test,CalcEntropy((double)numOfOnes,(double)numOfZeros))
-
         return tree;
     }
 }
