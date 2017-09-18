@@ -30,7 +30,7 @@ public class Main {
         int[] whenTestOne=new int[Math.max((int)Math.pow(check.size(),2),2)];
         int[] whenTestZero=new int[Math.max((int)Math.pow(check.size(),2),2)];
         int split=0;
-        double min=-111;
+        double min=-111,entropyL,entropyR;
         double [] InfoGain=new double[check.size()];
         double entropyfractionL,entropyfractionR;
         for(int j=0; j<whenTestOne.length;j++) {
@@ -43,31 +43,38 @@ public class Main {
             for(int y=1; y<test.size();y++)
             {
 
-                if(check.get(x).get(y).equals("1"))
+                if(test.get(y).equals("1"))
                 {
-                    if(test.get(y).equals("1"))
+                    if(check.get(x).get(y).equals("1"))
                         whenTestOne[(((x+1)*2)-1)]++;
                     else
-                        whenTestZero[(((x+1)*2)-1)]++;
+                        whenTestOne[(((x+1)*2)-2)]++;
+
                 }
                 else
-                if(check.get(x).get(y).equals("0"))
+                if(test.get(y).equals("0"))
                 {
-                    if(test.get(y).equals("1"))
-                        whenTestOne[(((x+1)*2)-2)]++;
+                    if(check.get(x).get(y).equals("1"))
+                        whenTestZero[(((x+1)*2)-1)]++;
                     else
                         whenTestZero[(((x+1)*2)-2)]++;
                 }
 
             }
 
-            entropyfractionL=(double)(whenTestOne[(((x+1)*2)-1)]+whenTestOne[(((x+1)*2)-2)])/(whenTestOne[(((x+1)*2)-1)]+whenTestOne[(((x+1)*2)-2)]
-                    +whenTestZero[(((x+1)*2)-1)]+whenTestZero[(((x+1)*2)-2)]);
-            entropyfractionR=(double)(whenTestZero[(((x+1)*2)-1)]+whenTestZero[(((x+1)*2)-2)])/(whenTestOne[(((x+1)*2)-1)]+whenTestOne[(((x+1)*2)-2)]
-                    +whenTestZero[(((x+1)*2)-1)]+whenTestZero[(((x+1)*2)-2)]);
+            entropyfractionL=(double)(whenTestOne[(((x+1)*2)-1)]+whenTestZero[(((x+1)*2)-1)])/(test.size()-1);
+                    entropyfractionR= (double)(whenTestOne[(((x+1)*2)-2)]+ whenTestZero[(((x+1)*2)-2)])/(test.size()-1);
+                            entropyL=CalcEntropy(whenTestOne[(((x+1)*2)-1)],whenTestZero[(((x+1)*2)-1)]);
+                                    entropyR=CalcEntropy( whenTestOne[(((x+1)*2)-2)],whenTestZero[(((x+1)*2)-2)]);
 
-           InfoGain[x]= (entropy-(((CalcEntropy(whenTestOne[(((x+1)*2)-1)],whenTestOne[(((x+1)*2)-2)]))*entropyfractionL)
-                   +((CalcEntropy(whenTestZero[(((x+1)*2)-1)],whenTestZero[(((x+1)*2)-2)]))*entropyfractionR)));
+           /* entropyfractionL=((double)(whenTestOne[(((x+1)*2)-1)]+whenTestZero[(((x+1)*2)-1)]))
+                    /(test.size()-1);
+            entropyL=(double)(CalcEntropy(whenTestOne[(((x+1)*2)-1)],whenTestZero[(((x+1)*2)-1)]));
+            entropyR=(double)(CalcEntropy(whenTestOne[(((x+1)*2)-2)],whenTestZero[(((x+1)*2)-2)]));
+            entropyfractionR=((double)(whenTestOne[(((x+1)*2)-2)]+whenTestZero[(((x+1)*2)-2)]))/
+                    (test.size()-1);
+            */
+           InfoGain[x]= (entropy-((entropyL*entropyfractionL)+(entropyR*entropyfractionR)));
         }
        for(int z=0;z< InfoGain.length ;z++)
         {
@@ -254,54 +261,17 @@ public class Main {
         splitR=decideSplit(checkR,testR.get(split),entropyR);
         checkR.remove(split);
         testR.remove(split);
-        /*if(isPure(testL.get(splitL))){
-            if(testL.get(splitL).get(1).equals("1"))
-            tree.add("T");
-            else
-                tree.add("F");
-            if(isPure(testR.get(splitR))) {
-                if (testR.get(splitR).get(1).equals("1"))
-                    tree.add("T");
-                else
-                    tree.add("F");
-            }else {
-                tree.add(checkR.get(splitR).get(0));
-            }
-            return tree;
-        }
-        else
-            if(isPure(testR.get(splitR)))
-        {
 
-            tree.add(checkL.get(splitL).get(0));
-            if(testR.get(splitR).get(1).equals("1"))
-                tree.add("T");
-            else
-                tree.add("F");
-            if(testL.get(0).size()<=2)
-                return tree;
-            tree= createTree(checkL,testL.get(splitL),entropyL,splitL,tree);
-            return tree;
-
-        }
-        else
-            {
-                tree.add(checkL.get(splitL).get(0));
-                tree.add(checkR.get(splitR).get(0));
-
-            }*/
         if(splitL!=0)
             splitL--;
         if(splitR!=0)
             splitR--;
         tree.add(name);
 
-        System.out.println("entering left "+checkL.get(splitL).get(0));
         tree=createTree(checkL,testL.get(splitL),entropyL,splitL,tree);
-        System.out.println("exiting left entering right "+ checkR.get(splitR).get(0));
         tree= createTree(checkR,testR.get(splitR),entropyR,splitR,tree);
        // return tree;
-        if(tree.get(tree.size()-1).equals("F")&&tree.get(tree.size()-2).equals("F") )
+      /*  if(tree.get(tree.size()-1).equals("F")&&tree.get(tree.size()-2).equals("F") )
         {
             tree.remove(tree.size()-1);
             tree.remove(tree.size()-1);
@@ -315,7 +285,7 @@ public class Main {
             tree.remove(tree.size()-1);
             tree.remove(tree.size()-1);
             tree.add("T");
-        }
+        }*/
         //split=decideSplit(check,test,CalcEntropy((double)numOfOnes,(double)numOfZeros))
         return tree;
     }
