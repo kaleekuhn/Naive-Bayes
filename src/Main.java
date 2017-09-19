@@ -1,4 +1,5 @@
 import java.io.*;
+import java.lang.reflect.Array;
 import java.util.*;
 
 public class Main {
@@ -16,15 +17,220 @@ public class Main {
             } else
                 numOfZeros++;
         }
+
+        Node parentTree = createDecisionTree(decisionData);
+        printTree(parentTree, -1);
+
+
         ArrayList<String> classList = decisionData.get(decisionData.size() - 1);
         ArrayList<String> tree = new ArrayList<String>((int) Math.pow(decisionData.size(), 2));
         decisionData.remove(decisionData.size() - 1);
         System.out.println();
         tree = createTree(decisionData, classList, CalcEntropy((double) numOfOnes, (double) numOfZeros), decideSplit(decisionData, classList, CalcEntropy((double) numOfOnes, (double) numOfZeros)), tree);
-        for (int x = 0; x < tree.size(); x++) {
+       /* for (int x = 0; x < tree.size(); x++) {
             System.out.println(tree.get(x) + "  " + x);
+        }*/
+    }
+
+    private static void printTree(Node tree, int depth) {
+        int move = ++depth;
+        if(tree.hasLeftChild()){
+            for(int x=0; x<depth; x++){
+                System.out.print(" | ");
+            }
+            System.out.println(tree.getName() + " 0 : " + tree.getData());
+            printTree(tree.getLeftChild(), move);
+        }
+        if(tree.hasRightChild()){
+            for(int x=0; x<depth; x++){
+                System.out.print(" | ");
+            }
+            System.out.println(tree.getName() + " 1 : " + tree.getData());
+            printTree(tree.getRightChild(), move);
         }
     }
+
+    private static Node createDecisionTree(ArrayList<ArrayList<String>> data) {
+        //System.out.println("Inside Create Decision Tree");
+       /* for(int x=0;x<data.size(); x++) {
+            for(int y=0; y<data.get(x).size(); y++) {
+                System.out.print(data.get(x).get(y));
+            }
+            System.out.println();
+        }
+*/
+        //First step, get the Entropy of the current Node
+        Node nodey = new Node();
+        nodey.setEntropy(1);
+        int posVals = 0, negVals = 0, totalVals = data.get(data.size()-1).size();
+        for(int x = 0; x<totalVals; x++) {
+            if(data.get(data.size()-1).get(x).compareTo("1")==0) {
+                posVals++;
+            }
+            else
+                negVals++;
+        }
+        //temp.setTotalPositive(posVals);
+        //temp.setTotalNegative(negVals);
+        double maxIG = -1;
+        int IGIndex = 0;
+        double ig = 0;
+
+        for(int x=0; x<data.size()-1;x++) {
+            //System.out.println("IG: " + (1- infoGain(x, posVals, negVals), data)));
+
+            ig = (nodey.getEntropy() - infoGain(x, data));
+            if(ig > maxIG) {
+                IGIndex = x;
+                maxIG = ig;
+            }
+            System.out.println("IG " + data.get(x).get(0) + ": " + (1- infoGain(x, data)) + " Index: " + IGIndex);
+
+        }
+        nodey.setName(data.get(IGIndex).get(0));
+        if(maxIG>10.0)
+        {
+            //System.out.println("Branch on " + maxIG);
+            nodey.setData("1");
+            return nodey;
+        }
+
+        //Need to remove the attribute title and depending on if true or false, only seed appropriate data
+        //System.out.println("Starting Second");
+
+        ArrayList<ArrayList<String>> Left = new ArrayList<ArrayList<String>>();
+        ArrayList<ArrayList<String>> Right = new ArrayList<ArrayList<String>>();
+
+        for(int x=0; x<data.size(); x++) {
+            Left.add(new ArrayList<String>());
+            Right.add(new ArrayList<String>());
+            Right.get(x).add(data.get(x).get(0));
+            Left.get(x).add(data.get(x).get(0));
+            for(int y=1;y<data.get(x).size();y++){
+                if(data.get(IGIndex).get(y).compareTo("1")==0)
+                    Right.get(x).add(data.get(x).get(y));
+                else
+                    Left.get(x).add(data.get(x).get(y));
+            }
+        }
+        Left.remove(IGIndex);
+        Right.remove(IGIndex);
+        /*System.out.println("Printing H0 new");
+        for(int x=0;x<Left.size(); x++) {
+            for(int y=0; y<Left.get(x).size(); y++) {
+                System.out.print(Left.get(x).get(y));
+            }
+            System.out.println();
+        }*/
+        if(Left.size()>=1) {
+            nodey.setLeftChild(createDecisionTree(Left));
+            nodey.setDirection("0");
+        }
+        if(Right.size()>=1) {
+            nodey.setRightChild(createDecisionTree(Right));
+            nodey.setDirection("1");
+        }
+        //System.out.println("Contains westly? " + getIndexOfName("wesley", data));
+        if(nodey.isLeafNode()) {
+            nodey.setData("value");
+        }
+        return nodey;
+    }
+
+    private static int getIndexOfName ( String name, ArrayList<ArrayList<String>> data) {
+        for(int x=0; x<data.size(); x++) {
+            if(data.get(x).get(0).equals(name)){
+                return x;
+            }
+        }
+        return -1;
+    }
+
+    private static double calcEntropy1 (int numPos, ArrayList<ArrayList<String>> data) {
+        //int index = getIndexOfName("class", data);
+        int posVals = 0, negVals = 0, totalVals = data.get(numPos).size();
+        for(int x = 0; x<totalVals; x++) {
+            if(data.get(numPos).get(x).compareTo("1")==0) {
+                posVals++;
+            }
+            else
+                negVals++;
+        }
+        //System.out.println("Pos: " + posVals + " Neg: " + negVals + " total: " + totalVals);
+        double posFrac = posVals/(totalVals*1.0);
+        double negFrac = negVals/(totalVals*1.0);
+        //System.out.println(posFrac + " " + negFrac);
+        double entropy = -(posFrac)*(Math.log(posFrac)/Math.log(2)) -(negFrac)*(Math.log(negFrac)/Math.log(2));
+        //System.out.println("Entropy: " + entropy);
+        return entropy;
+    }
+
+    private static double calcEntropy (int numPos, int numNeg){
+        double totalVals = (numNeg + numPos) *1.0; //To make it a decimal
+        double posFrac = numPos/(totalVals);
+        double negFrac = numNeg/(totalVals);
+        //System.out.println(posFrac + " " + negFrac);
+        double entropy = -(posFrac)*(Math.log(posFrac)/Math.log(2)) -(negFrac)*(Math.log(negFrac)/Math.log(2));
+        //System.out.println("Entropy: " + entropy);
+        return entropy;
+    }
+
+    private static double infoGain(int index, ArrayList<ArrayList<String>> data) {
+        if(data.size()<=2)
+            return -11;
+        ArrayList<ArrayList<String>> H0 = new ArrayList<ArrayList<String>>(data.size());
+        ArrayList<ArrayList<String>> H1 = new ArrayList<ArrayList<String>>(data.size());
+
+
+        for(int x=0; x<data.size(); x++) {
+            H0.add(new ArrayList<String>());
+            H1.add(new ArrayList<String>());
+            for(int y=0;y<data.get(x).size();y++){
+                if(data.get(index).get(y).compareTo("1")==0)
+                    H1.get(x).add(data.get(x).get(y));
+                else
+                    H0.get(x).add(data.get(x).get(y));
+            }
+        }
+/*        System.out.println("Printing New");
+        for(int x=0;x<H0.size(); x++) {
+            for(int y=0; y<H0.get(x).size(); y++) {
+                System.out.print(H0.get(x).get(y));
+            }
+            System.out.println();
+        }*/
+        //System.out.println("Entropy for H0 " + calcEntropy1(data.size()-1, H0) + " Entropy for H1 " +
+        //calcEntropy1(data.size()-1, H1);
+
+        double fracPos = 1.0*H1.get(0).size()/data.get(0).size();
+        double fracNeg = 1.0*H0.get(0).size()/data.get(0).size();
+
+
+        double IG = calcEntropy1(data.size()-1, H1) * fracPos + calcEntropy1(data.size()-1, H0) * fracNeg;
+        //System.out.println("IG is: " + (1-IG));
+        return IG;
+    }
+
+    private static double infoGain1(int index, ArrayList<ArrayList<String>> data) {
+
+        ArrayList<ArrayList<String>> removed = new ArrayList<ArrayList<String>>();
+        //Need to remove all the 1's or all the 0's then calc the entropy of thoes
+
+
+        int posVals = 0, negVals = 0, totalVals = data.get(index).size();
+        for(int x = 1; x<totalVals; x++) {
+            if(data.get(index).get(x).compareTo("1")==0)
+                posVals++;
+            else
+                negVals++;
+        }
+        //System.out.println("Pos: " + posVals + " Neg: " + negVals + " total: " + totalVals);
+        double H0 = calcEntropy(posVals, negVals);
+        double H1 = calcEntropy(posVals, negVals);
+
+        return 0;
+    }
+
     private static int decideSplit ( ArrayList<ArrayList<String>> check, ArrayList<String> test, double entropy) {
 
         int[] whenTestOne=new int[Math.max((int)Math.pow(check.size(),2),2)];
@@ -93,7 +299,9 @@ public class Main {
                 ((((-1*second)/(first+second))*(Math.log10(second/(first+second))/Math.log10(2)))));
     }
     private static ArrayList<ArrayList<String>> fileToArrayList(String fileName) {
-        File testData = new File("D:\\Machine learning\\Decision-Tree\\data/" + fileName);
+        //File testData = new File("D:\\Machine learning\\Decision-Tree\\data/" + fileName);
+        File testData = new File("../project1/data/" + fileName);
+
         //System.out.println(testData.getAbsolutePath());
 
         try {
@@ -104,7 +312,7 @@ public class Main {
             Scanner sc1 = new Scanner(headerLine).useDelimiter("\\s");
             while(sc1.hasNext()){
                sc1.next();
-                numberOfAttributes++;
+               numberOfAttributes++;
             }
 
             ArrayList<ArrayList<String>> decisionData = new ArrayList<ArrayList<String>>(numberOfAttributes);
@@ -271,7 +479,7 @@ public class Main {
         tree=createTree(checkL,testL.get(splitL),entropyL,splitL,tree);
         tree= createTree(checkR,testR.get(splitR),entropyR,splitR,tree);
        // return tree;
-      /*  if(tree.get(tree.size()-1).equals("F")&&tree.get(tree.size()-2).equals("F") )
+        if(tree.get(tree.size()-1).equals("F")&&tree.get(tree.size()-2).equals("F") )
         {
             tree.remove(tree.size()-1);
             tree.remove(tree.size()-1);
@@ -285,7 +493,7 @@ public class Main {
             tree.remove(tree.size()-1);
             tree.remove(tree.size()-1);
             tree.add("T");
-        }*/
+        }
         //split=decideSplit(check,test,CalcEntropy((double)numOfOnes,(double)numOfZeros))
         return tree;
     }
