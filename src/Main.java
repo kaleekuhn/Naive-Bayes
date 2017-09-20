@@ -1,3 +1,19 @@
+/*
+The functionality of this program is simple, from the users perspective. When running
+this program, you must pass in 2 arguments, the train.dat file and the test.dat file.
+Once these are generated, the program will create a 2 dimensional arraylist of arraylists,
+these hold the data that the decision tree will be made on. Next the program will iterate
+through the arraylist and calculate the information gain at each node. Branching on
+whatever node has the highest information gain. Finally, the tree is constructed using a
+linked list with 2 children which are the branches.
+
+We simply iterate through our decision tree array using a Depth First Search algorithm to
+print out the tree to the console. We test the accuracy of the tree in a similar fashion.
+We iterate through the test data and if the selection is equal to what we selected, we can
+increment the "correctness" by 1. Finally we can perform simple math to determine the
+percentage of correctness.
+
+*/
 import java.io.*;
 import java.lang.reflect.Array;
 import java.util.*;
@@ -20,10 +36,20 @@ public class Main {
                 numOfZeros++;
         }
 
+        ArrayList<ArrayList<String>> Smaller = new ArrayList<ArrayList<String>>();
+        for(int x=0; x<decisionData.size(); x++) {
+            Smaller.add(new ArrayList<String>());
+            for(int y=0; y<450; y++){
+                Smaller.get(x).add(decisionData.get(x).get(y));
+            }
+        }
+
         Node parentTree = createDecisionTree(decisionData,0);
+        //Node parentTree = createDecisionTree(Smaller,0);
+
         printTree(parentTree, -1);
         System.out.println("Accuracy on Training set ("+(decisionData.get(0).size()-1)+") instances "+treeAnalysis(parentTree,decisionData)  );
-        System.out.println("Accuracy on Training set ("+(testingData.get(0).size()-1)+") instances "+ treeAnalysis(parentTree,testingData)  );
+        System.out.println("Accuracy on Testing set ("+(testingData.get(0).size()-1)+") instances "+ treeAnalysis(parentTree,testingData)  );
 
     }
 
@@ -182,7 +208,10 @@ public class Main {
         double posFrac = posVals/(totalVals*1.0);
         double negFrac = negVals/(totalVals*1.0);
         //System.out.println(posFrac + " " + negFrac);
-        double entropy = -(posFrac)*(Math.log(posFrac)/Math.log(2)) -(negFrac)*(Math.log(negFrac)/Math.log(2));
+
+        double first = posFrac == 0.0 ? 0 : -(posFrac)*(Math.log(posFrac)/Math.log(2));
+        double second = negFrac == 0.0 ? 0 : -(negFrac)*(Math.log(negFrac)/Math.log(2));
+        double entropy = first + second;
         //System.out.println("Entropy: " + entropy);
         return entropy;
     }
@@ -224,14 +253,16 @@ public class Main {
     }
 
     private static ArrayList<ArrayList<String>> fileToArrayList(String fileName) {
-        File testData = new File("D:\\Machine learning\\Decision-Tree\\data/" + fileName);
-        //File testData = new File("../project1/data/" + fileName);
+        //File testData = new File("D:\\Machine learning\\Decision-Tree\\data/" + fileName);
+        File testData = new File("../project1/data/" + fileName);
 
         //System.out.println(testData.getAbsolutePath());
 
         try {
             Scanner sc = new Scanner(testData);
             String headerLine = sc.nextLine();
+            while(headerLine.isEmpty())
+                headerLine = sc.nextLine();
 
             int numberOfAttributes = 0;
             Scanner sc1 = new Scanner(headerLine).useDelimiter("\\s");
