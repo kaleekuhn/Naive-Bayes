@@ -7,18 +7,43 @@
 * compile and run, what platform we developed file
 * find line where file to array and insert file path for program to work.
 *
-* */public class Node {
+* */
+public class Node {
 
-    double Entropy;
+    int numberOfOnes;
+    int numberOfZeros;
+    int totalClassNumber;
+    String name;
 
-    Node leftChild = null;
-    boolean hasLeft = false;
-    Node rightChild = null;
-    boolean hasRight = false;
-    String data= "";
-    boolean isLeafNode = true;
-    String name = "";
+    public int getTotalNumOf(String n) {
+        if(n.compareTo("1")==0)
+            return numberOfOnes;
+        else
+            return numberOfZeros;
+    }
+    public int getTotalClassNumber() {
+        return totalClassNumber;
+    }
 
+    public void setTotalClassNumber(int totalClassNumber) {
+        this.totalClassNumber = totalClassNumber;
+    }
+
+    public int getNumberOfOnes() {
+        return numberOfOnes;
+    }
+
+    public void setNumberOfOnes(int numberOfOnes) {
+        this.numberOfOnes = numberOfOnes;
+    }
+
+    public int getNumberOfZeros() {
+        return numberOfZeros;
+    }
+
+    public void setNumberOfZeros(int numberOfZeros) {
+        this.numberOfZeros = numberOfZeros;
+    }
 
     public String getName() {
         return name;
@@ -30,68 +55,6 @@
 
 
 
-    public boolean isLeafNode() {
-        return isLeafNode;
-    }
-
-    public void setLeafNode(boolean leafNode) {
-        isLeafNode = leafNode;
-    }
-
-    public String getDirection() {
-        return direction;
-    }
-
-    public void setDirection(String direction) {
-        this.direction = direction;
-    }
-
-    String direction;
-    public String getData() {
-        return data;
-    }
-
-    public void setData(String data) {
-        this.data = data;
-    }
-
-    public Node() {
-    }
-
-    public double getEntropy() {
-        return Entropy;
-    }
-
-    public void setEntropy(double entropy) {
-        Entropy = entropy;
-    }
-
-    public Node getLeftChild() {
-        return leftChild;
-    }
-
-    public void setLeftChild(Node leftChild) {
-        this.leftChild = leftChild;
-        hasLeft = true;
-        isLeafNode = false;
-    }
-
-    public boolean hasLeftChild() {
-        return hasLeft;
-    }
-
-    public boolean hasRightChild() {
-        return hasRight;
-    }
-    public Node getRightChild() {
-        return rightChild;
-    }
-
-    public void setRightChild(Node rightChild) {
-        this.rightChild = rightChild;
-        hasRight = true;
-        isLeafNode = false;
-    }
 
 
 }

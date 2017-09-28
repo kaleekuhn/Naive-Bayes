@@ -31,6 +31,102 @@ public class Main {
         ArrayList<ArrayList<String>> decisionData = fileToArrayList(args[0]);
         ArrayList<ArrayList<String>> testingData = fileToArrayList(args[1]);
 
+
+        //Split the array based on the class being one or zero
+        int numOnes = 0;
+        int numZeros = 0;
+        ArrayList<ArrayList<String>> decisionOnes = new ArrayList<ArrayList<String>>();
+        //decisionOnes.add(new ArrayList<String>());
+        ArrayList<ArrayList<String>> decisionZero = new ArrayList<ArrayList<String>>();
+        //decisionZero.add(new ArrayList<String>());
+        ArrayList<Node> listOfNodes0 = new ArrayList<Node>();
+        ArrayList<Node> listOfNodes1 = new ArrayList<Node>();
+
+
+        for(int x=0; x<decisionData.get(decisionData.size()-1).size(); x++) {
+            ArrayList<String> data = new ArrayList<String>();
+            if(x==0){
+                for(int y = 0; y<decisionData.size()-1; y++){
+                    data.add(decisionData.get(y).get(x));
+                }
+                decisionOnes.add(data);
+                decisionZero.add(data);
+                continue;
+            }
+            if(decisionData.get(decisionData.size()-1).get(x).compareTo("1") == 0){
+                for(int y = 0; y<decisionData.size()-1; y++){
+                    data.add(decisionData.get(y).get(x));
+                }
+                decisionOnes.add(data);
+            }
+            else {
+                for(int y = 0; y<decisionData.size()-1; y++){
+                    data.add(decisionData.get(y).get(x));
+                }
+                decisionZero.add(data);
+            }
+        }
+
+        for(int y=0; y<decisionOnes.get(0).size(); y++) {
+            Node temp = new Node();
+            int counter1 = 0;
+            int counter0 = 0;
+
+            for (int x = 0; x < decisionOnes.size(); x++) {
+                if (decisionOnes.get(x).get(y).compareTo("1") == 0){
+                    counter1++;
+                }
+                else {
+                    counter0++;
+                }
+            }
+            temp.setNumberOfOnes(counter1);
+            temp.setNumberOfZeros(counter0);
+            temp.setName(decisionOnes.get(0).get(y));
+            temp.setTotalClassNumber(decisionOnes.size());
+            listOfNodes1.add(temp);
+        }
+
+        for(int y=0; y<decisionZero.get(0).size(); y++) {
+            Node temp = new Node();
+            int counter1 = 0;
+            int counter0 = 0;
+
+            for (int x = 0; x < decisionZero.size(); x++) {
+                if (decisionZero.get(x).get(y).compareTo("1") == 0){
+                    counter1++;
+                }
+                else {
+                    counter0++;
+                }
+            }
+            temp.setNumberOfOnes(counter1);
+            temp.setNumberOfZeros(counter0);
+            temp.setName(decisionZero.get(0).get(y));
+            temp.setTotalClassNumber(decisionZero.size());
+            listOfNodes0.add(temp);
+        }
+
+
+        for(int x=0; x<listOfNodes1.size(); x++) {
+            System.out.println("Name: " + listOfNodes1.get(x).getName() + " GetNumOnes: " + listOfNodes1.get(x).getNumberOfOnes());
+        }
+        for(int x=0; x<listOfNodes0.size(); x++) {
+            System.out.println("Name: " + listOfNodes0.get(x).getName() + " GetNumZeros: " + listOfNodes0.get(x).getNumberOfZeros());
+        }
+
+        System.out.println("Printing decision ones");
+        for(int x=0; x<decisionOnes.size(); x++){
+            for(int y=0; y<decisionOnes.get(0).size(); y++){
+                System.out.print(decisionOnes.get(x).get(y));
+            }
+            System.out.println();
+        }
+
+
+        String moose = testStuff(decisionData, listOfNodes1, listOfNodes0, decisionOnes.size(), decisionZero.size());
+
+
         //Print Array
         for (int x = 1; x < decisionData.get(decisionData.size() - 1).size(); x++) {
             if (decisionData.get(decisionData.size() - 1).get(x).equals("1")) {
@@ -47,217 +143,57 @@ public class Main {
             }
         }
 
-        Node parentTree = createDecisionTree(decisionData,0);
+    /*    Node parentTree = createDecisionTree(decisionData,0);
         //Node parentTree = createDecisionTree(Smaller,0);
 
         printTree(parentTree, -1);
         System.out.println("Accuracy on Training set ("+(decisionData.get(0).size()-1)+") instances "+treeAnalysis(parentTree,decisionData)  );
         System.out.println("Accuracy on Testing set ("+(testingData.get(0).size()-1)+") instances "+ treeAnalysis(parentTree,testingData)  );
-
-    }
-
-    private static void printTree(Node tree, int depth) {
-        int move = ++depth;
-        if(tree.hasLeftChild()){
-            for(int x=0; x<depth; x++){
-                System.out.print(" | ");
-            }
-            System.out.println(tree.getName() + " 0 : " + tree.getData());
-            printTree(tree.getLeftChild(), move);
-        }
-        else {
-            for(int x=0; x<depth; x++){
-                System.out.print(" | ");
-            }
-            System.out.println(tree.getName() + " 0 : " + tree.getData());
-        }
-        if(tree.hasRightChild()){
-            for(int x=0; x<depth; x++){
-                System.out.print(" | ");
-            }
-            System.out.println(tree.getName() + " 1 : " + tree.getData());
-            printTree(tree.getRightChild(), move);
-        }
-        else {
-            for(int x=0; x<depth; x++){
-                System.out.print(" | ");
-            }
-            System.out.println(tree.getName() + " 1 : " + tree.getData());
-        }
-    }
-
-    private static Node createDecisionTree(ArrayList<ArrayList<String>> data, int direction) {
-        //System.out.println("Inside Create Decision Tree");
-       /* for(int x=0;x<data.size(); x++) {
-            for(int y=0; y<data.get(x).size(); y++) {
-                System.out.print(data.get(x).get(y));
-            }
-            System.out.println();
-        }
 */
-        //First step, get the Entropy of the current Node
-        Node nodey = new Node();
-        nodey.setEntropy(1);
-        int posVals = 0, negVals = 0, totalVals = data.get(data.size()-1).size();
-        for(int x = 0; x<totalVals; x++) {
-            if(data.get(data.size()-1).get(x).compareTo("1")==0) {
-                posVals++;
-            }
-            else
-                negVals++;
-        }
+    }
 
-        //temp.setTotalPositive(posVals);
-        //temp.setTotalNegative(negVals);
-        double maxIG = -1;
-        int IGIndex = 0;
-        double ig = 0;
+    public static String testStuff(ArrayList<ArrayList<String>> test, ArrayList<Node> Ones, ArrayList<Node> Zeros, int sizeOnes, int sizeZeros) {
+        double calculator0 = 1;
+        double calculator1 = 1;
 
-        for(int x=0; x<data.size()-1;x++) {
-            //System.out.println("IG: " + (1- infoGain(x, posVals, negVals), data)));
+        int correctness = 0;
 
-            ig = (nodey.getEntropy() - infoGain(x, data));
-            if(ig > maxIG) {
-                IGIndex = x;
-                maxIG = ig;
-            }
-            //System.out.println("IG " + data.get(x).get(0) + ": " + (1- infoGain(x, data)) + " Index: " + IGIndex);
-
-        }
-        nodey.setName(data.get(IGIndex).get(0));
-     //   System.out.println(nodey.getName() +"  "+direction);
-        //Need to remove the attribute title and depending on if true or false, only seed appropriate data
-        //System.out.println("Starting Second");
-
-        ArrayList<ArrayList<String>> Left = new ArrayList<ArrayList<String>>();
-        ArrayList<ArrayList<String>> Right = new ArrayList<ArrayList<String>>();
-
-        for(int x=0; x<data.size(); x++) {
-            Left.add(new ArrayList<String>());
-            Right.add(new ArrayList<String>());
-            Right.get(x).add(data.get(x).get(0));
-            Left.get(x).add(data.get(x).get(0));
-            for(int y=1;y<data.get(x).size();y++){
-                if(data.get(IGIndex).get(y).compareTo("1")==0)
-                    Right.get(x).add(data.get(x).get(y));
-                else
-                    Left.get(x).add(data.get(x).get(y));
-            }
-        }
-        if(maxIG>10)
+        //goes through everyline in the column
+        for(int x=1; x< test.get(0).size()-1;x++)
         {
+            //goes through every column per line
+            calculator0 = 1;
+            calculator1 = 1;
+            for(int y=0; y<test.size()-1; y++)
+            {
+                calculator1 = calculator1*((double)Ones.get(y).getTotalNumOf(test.get(y).get(x))/Ones.get(y).getTotalClassNumber());
+                calculator0 = calculator0*((double)Zeros.get(y).getTotalNumOf(test.get(y).get(x))/Zeros.get(y).getTotalClassNumber());
 
-
-
-                if (direction == 0) {
-                    if (Count(Left.get(1)) == 1)
-                        nodey.setData("1");
-                    else
-                        nodey.setData("0");
-                    return nodey;
-                } else if (direction == 1) ;
-                {
-                    if (Count(Right.get(1)) == 1)//22
-                    {
-                        nodey.setData("1");
-                    } else
-                        nodey.setData("0");
-                    return nodey;
-                }
-
-        }
-
-        Left.remove(IGIndex);
-        Right.remove(IGIndex);
-        /*System.out.println("Printing H0 new");
-        for(int x=0;x<Left.size(); x++) {
-            for(int y=0; y<Left.get(x).size(); y++) {
-                System.out.print(Left.get(x).get(y));
+                //still needs to calculate false and determine which is better and keep score of the number of correct
             }
-            System.out.println();
-        }*/
-        if(Left.size()>=1) {
-            nodey.setLeftChild(createDecisionTree(Left,0));
-            nodey.setDirection("0");
-        }
-        if(Right.size()>=1) {
-            nodey.setRightChild(createDecisionTree(Right,1));
-            nodey.setDirection("1");
-        }
-        //System.out.println("Contains westly? " + getIndexOfName("wesley", data));
-        return nodey;
-    }
+            System.out.println("Ones: " + sizeOnes + " Zeros: " + sizeZeros);
+            calculator1 = calculator1*(sizeOnes/800.0);
+            calculator0 = calculator0*(sizeZeros/800.0);
 
-    private static int getIndexOfName ( String name, ArrayList<ArrayList<String>> data) {
-        for(int x=0; x<data.size(); x++) {
-            if(data.get(x).get(0).equals(name)){
-                return x;
+            System.out.println("Calc1: " + calculator1);
+            System.out.println("Calc0: " + calculator0);
+            if(calculator0 >= calculator1 && test.get(test.size()-1).get(x).compareTo("0") == 0) {
+                correctness++;
             }
-        }
-        return -1;
-    }
-
-    private static double calcEntropy1 (int numPos, ArrayList<ArrayList<String>> data) {
-        //int index = getIndexOfName("class", data);
-        int posVals = 0, negVals = 0, totalVals = data.get(numPos).size();
-        for(int x = 0; x<totalVals; x++) {
-            if(data.get(numPos).get(x).compareTo("1")==0) {
-                posVals++;
+            if(calculator0 <= calculator1 && test.get(test.size()-1).get(x).compareTo("1") == 0) {
+                correctness++;
             }
-            else
-                negVals++;
+            //
         }
-        //System.out.println("Pos: " + posVals + " Neg: " + negVals + " total: " + totalVals);
-        double posFrac = posVals/(totalVals*1.0);
-        double negFrac = negVals/(totalVals*1.0);
-        //System.out.println(posFrac + " " + negFrac);
+        System.out.println("Correctness: " + correctness/(test.get(0).size()*1.0));
+            System.out.println("Calc Final: " + Math.max(calculator1,calculator0));
 
-        double first = posFrac == 0.0 ? 0 : -(posFrac)*(Math.log(posFrac)/Math.log(2));
-        double second = negFrac == 0.0 ? 0 : -(negFrac)*(Math.log(negFrac)/Math.log(2));
-        double entropy = first + second;
-        //System.out.println("Entropy: " + entropy);
-        return entropy;
-    }
-
-    private static double infoGain(int index, ArrayList<ArrayList<String>> data) {
-        if(data.size()<=2)
-            return -11;
-        ArrayList<ArrayList<String>> H0 = new ArrayList<ArrayList<String>>(data.size());
-        ArrayList<ArrayList<String>> H1 = new ArrayList<ArrayList<String>>(data.size());
-
-
-        for(int x=0; x<data.size(); x++) {
-            H0.add(new ArrayList<String>());
-            H1.add(new ArrayList<String>());
-            for(int y=0;y<data.get(x).size();y++){
-                if(data.get(index).get(y).compareTo("1")==0)
-                    H1.get(x).add(data.get(x).get(y));
-                else
-                    H0.get(x).add(data.get(x).get(y));
-            }
-        }
-/*        System.out.println("Printing New");
-        for(int x=0;x<H0.size(); x++) {
-            for(int y=0; y<H0.get(x).size(); y++) {
-                System.out.print(H0.get(x).get(y));
-            }
-            System.out.println();
-        }*/
-        //System.out.println("Entropy for H0 " + calcEntropy1(data.size()-1, H0) + " Entropy for H1 " +
-        //calcEntropy1(data.size()-1, H1);
-
-        double fracPos = 1.0*H1.get(0).size()/data.get(0).size();
-        double fracNeg = 1.0*H0.get(0).size()/data.get(0).size();
-
-
-        double IG = calcEntropy1(data.size()-1, H1) * fracPos + calcEntropy1(data.size()-1, H0) * fracNeg;
-        //System.out.println("IG is: " + (1-IG));
-        return IG;
+        return "";
     }
 
     private static ArrayList<ArrayList<String>> fileToArrayList(String fileName) {
         //File testData = new File("D:\\Machine learning\\Decision-Tree\\data/" + fileName);
-        File testData = new File("../project1/data/" + fileName);
+        File testData = new File("../Naive-Bayes/data/" + fileName);
 
         //System.out.println(testData.getAbsolutePath());
 
@@ -320,26 +256,4 @@ public class Main {
             return 1;
     }
 
-    private static double treeAnalysis(Node tree, ArrayList<ArrayList<String>> data)
-    {
-        int index;
-        Node next=tree;
-        int totalcorrect=0;
-        for(int x=1;x<(data.get(data.size()-1).size()-1);x++) {
-            while (!next.isLeafNode()) {
-
-                index = getIndexOfName(tree.getName(), data);
-                if (data.get(index).get(x).equals("0")) {
-                    next = next.getLeftChild();
-                } else if (data.get(index).get(x).equals("1")) {
-                    next = next.getRightChild();
-                }
-            }
-
-            if (next.getData().equals(data.get(data.size() - 1).get(x)))
-                totalcorrect++;
-            next = tree;
-        }
-        return ((double)totalcorrect/(data.get(0).size()-1))*100;
-    }
 }
