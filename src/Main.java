@@ -2,21 +2,17 @@
 The functionality of this program is simple, from the users perspective. When running
 this program, you must pass in 2 arguments, the train.dat file and the test.dat file.
 Once these are generated, the program will create a 2 dimensional arraylist of arraylists,
-these hold the data that the decision tree will be made on. Next the program will iterate
-through the arraylist and calculate the information gain at each node. Branching on
-whatever node has the highest information gain. Finally, the tree is constructed using a
-linked list with 2 children which are the branches.
+these hold the data that the decision tree will be made on. The program will split the
+array of data into two sub arrays, depending on the class number (1 or 0)
 
-We simply iterate through our decision tree array using a Depth First Search algorithm to
-print out the tree to the console. We test the accuracy of the tree in a similar fashion.
-We iterate through the test data and if the selection is equal to what we selected, we can
-increment the "correctness" by 1. Finally we can perform simple math to determine the
-percentage of correctness.
-
+We will then create a node class that for every attribute, it will count the number of
+ones and zeros and store it in a node array. Finally, the program will iterate through the
+training and test data and calculate the probabilities based on the naive bayes formula.
 */
 import java.io.*;
 import java.lang.reflect.Array;
 import java.util.*;
+import java.text.DecimalFormat;
 /*
 
 */
@@ -108,7 +104,7 @@ public class Main {
         }
 
 
-        for(int x=0; x<listOfNodes1.size(); x++) {
+        /*for(int x=0; x<listOfNodes1.size(); x++) {
             System.out.println("Name: " + listOfNodes1.get(x).getName() + " GetNumOnes: " + listOfNodes1.get(x).getNumberOfOnes());
         }
         for(int x=0; x<listOfNodes0.size(); x++) {
@@ -122,9 +118,23 @@ public class Main {
             }
             System.out.println();
         }
+*/
+        System.out.printf("P(%s=0|c0)=%.2f ", "C",(listOfNodes0.size()*1.0/(listOfNodes0.size()+listOfNodes1.size())));
 
+        for(int x = 0; x<listOfNodes0.size(); x++) {
+            System.out.printf("P(%s=0|c0)=%.2f ",listOfNodes0.get(x).getName(),(listOfNodes0.get(x).getNumberOfZeros()*1.0/listOfNodes0.get(x).getTotalClassNumber()));
+            System.out.printf("P(%s=1|c0)=%.2f ",listOfNodes0.get(x).getName(),(listOfNodes0.get(x).getNumberOfOnes()*1.0/listOfNodes0.get(x).getTotalClassNumber()));
+        }
+        System.out.println();
+        System.out.printf("P(%s=1|c0)=%.2f ", "C",(listOfNodes1.size()*1.0/(listOfNodes0.size()+listOfNodes1.size())));
+        for(int x = 0; x<listOfNodes1.size(); x++) {
+            System.out.printf("P(%s=0|c1)=%.2f ",listOfNodes1.get(x).getName(),(listOfNodes1.get(x).getNumberOfZeros()*1.0/listOfNodes1.get(x).getTotalClassNumber()));
+            System.out.printf("P(%s=1|c1)=%.2f ",listOfNodes1.get(x).getName(),(listOfNodes1.get(x).getNumberOfOnes()*1.0/listOfNodes1.get(x).getTotalClassNumber()));
+        }
+        System.out.println();
 
-        String moose = testStuff(decisionData, listOfNodes1, listOfNodes0, decisionOnes.size(), decisionZero.size());
+        String moose = testStuff(decisionData, listOfNodes1, listOfNodes0, decisionOnes.size(), decisionZero.size(), "training", decisionData.get(0).size()-1);
+        String moose1 = testStuff(testingData, listOfNodes1, listOfNodes0, decisionOnes.size(), decisionZero.size(), "test", testingData.get(0).size()-1);
 
 
         //Print Array
@@ -152,11 +162,20 @@ public class Main {
 */
     }
 
-    public static String testStuff(ArrayList<ArrayList<String>> test, ArrayList<Node> Ones, ArrayList<Node> Zeros, int sizeOnes, int sizeZeros) {
+    public static String testStuff(ArrayList<ArrayList<String>> test, ArrayList<Node> Ones, ArrayList<Node> Zeros, int sizeOnes, int sizeZeros, String setName, int numInstances) {
+
+        DecimalFormat df = new DecimalFormat();
+        df.setMaximumFractionDigits(2);
+
         double calculator0 = 1;
         double calculator1 = 1;
 
         int correctness = 0;
+
+        String trueOutput = "";
+        String falseOutput = "";
+        double class1Prob = ((1.0*sizeOnes)/(sizeOnes+sizeZeros));
+        double class0Prob = ((1.0*sizeZeros)/(sizeOnes+sizeZeros));
 
         //goes through everyline in the column
         for(int x=1; x< test.get(0).size()-1;x++)
@@ -168,15 +187,16 @@ public class Main {
             {
                 calculator1 = calculator1*((double)Ones.get(y).getTotalNumOf(test.get(y).get(x))/Ones.get(y).getTotalClassNumber());
                 calculator0 = calculator0*((double)Zeros.get(y).getTotalNumOf(test.get(y).get(x))/Zeros.get(y).getTotalClassNumber());
-
-                //still needs to calculate false and determine which is better and keep score of the number of correct
             }
-            System.out.println("Ones: " + sizeOnes + " Zeros: " + sizeZeros);
-            calculator1 = calculator1*(sizeOnes/800.0);
-            calculator0 = calculator0*(sizeZeros/800.0);
+            //Printing Top of page 4
 
-            System.out.println("Calc1: " + calculator1);
-            System.out.println("Calc0: " + calculator0);
+
+            //System.out.println("Ones: " + sizeOnes + " Zeros: " + sizeZeros);
+            calculator1 = calculator1*class1Prob;
+            calculator0 = calculator0*class0Prob;
+
+           // System.out.println("Calc1: " + calculator1);
+            //System.out.println("Calc0: " + calculator0);
             if(calculator0 >= calculator1 && test.get(test.size()-1).get(x).compareTo("0") == 0) {
                 correctness++;
             }
@@ -185,8 +205,8 @@ public class Main {
             }
             //
         }
-        System.out.println("Correctness: " + correctness/(test.get(0).size()*1.0));
-            System.out.println("Calc Final: " + Math.max(calculator1,calculator0));
+        System.out.println("Accuracy on " + setName + " set (" + numInstances + " instances): " + df.format((correctness/(test.get(0).size()*1.0))*100) + "%");
+            //System.out.println("Calc Final: " + Math.max(calculator1,calculator0));
 
         return "";
     }

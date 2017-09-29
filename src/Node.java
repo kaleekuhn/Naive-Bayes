@@ -1,11 +1,5 @@
 /*
-* In this Node file, we put together all of the necessary attributes for our Binary tree nodes.
-* This node class will be the attributes in our binary tree so it will have all the necessary methods to get and store
-* information.
-*
-*
-* compile and run, what platform we developed file
-* find line where file to array and insert file path for program to work.
+* In this Node file, we put together all of the necessary attributes for our different attribute classes
 *
 * */
 public class Node {
